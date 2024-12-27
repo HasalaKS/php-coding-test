@@ -7,9 +7,7 @@
         @vite(['resources/js/app.js'])
     </head>
     <body>
-        <div class="container">
-            <h1 class="text-center mt-5">Online Support System</h1>
-            <button class="btn btn-primary">Create Ticket</button>
+        <div id="container">
         </div>
     </body>
 </html>
