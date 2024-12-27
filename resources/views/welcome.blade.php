@@ -1,3 +1,15 @@
-<div id="app">
-    <h1>Php Coding Test</h1>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Php Coding Test</title>
+        @vite(['resources/js/app.js'])
+    </head>
+    <body>
+        <div class="container">
+            <h1 class="text-center mt-5">Online Support System</h1>
+            <button class="btn btn-primary">Create Ticket</button>
+        </div>
+    </body>
+</html>
