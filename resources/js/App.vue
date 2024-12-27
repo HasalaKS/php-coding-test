@@ -1,9 +1,9 @@
 <template>
     <div>
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container-fluid">
                 <router-link class="nav-link" to="/">
-                    <a class="navbar-brand" href="#">My App</a>
+                    <a class="navbar-brand">PHP Test</a>
                 </router-link>
                 <button
                     class="navbar-toggler"
@@ -16,12 +16,23 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav">
+                    <ul class="navbar-nav me-auto">
                         <li class="nav-item">
-                            <router-link class="nav-link" to="/">Home</router-link>
+                            <router-link class="nav-link" to="/">
+                                Home
+                            </router-link>
                         </li>
                         <li class="nav-item">
-                            <router-link class="nav-link" to="/about">About</router-link>
+                            <router-link class="nav-link" to="/about">
+                                About
+                            </router-link>
+                        </li>
+                    </ul>
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <router-link to="/login">
+                                <a class="btn btn-outline-success">Login</a>
+                            </router-link>
                         </li>
                     </ul>
                 </div>
@@ -35,5 +46,5 @@
 </template>
 
 <script>
-    export default { name: "App" };
+export default { name: "App" };
 </script>
