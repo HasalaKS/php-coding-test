@@ -12,8 +12,7 @@
                     data-bs-target="#navbarNav"
                     aria-controls="navbarNav"
                     aria-expanded="false"
-                    aria-label="Toggle navigation"
-                >
+                    aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
@@ -28,7 +27,6 @@
                                 Search Ticket
                             </router-link>
                         </li>
-
                         <li v-if="isUserAuthenticated" class="nav-item">
                             <router-link class="nav-link" to="/tickets">
                                 Manage Tickets
@@ -42,11 +40,7 @@
                             </router-link>
                         </li>
                         <li v-if="isUserAuthenticated" class="nav-item">
-                            <a
-                                @click.prevent="logout"
-                                class="btn btn-outline-success"
-                                >Logout</a
-                            >
+                            <a @click.prevent="logout" class="btn btn-outline-success">Logout</a>
                         </li>
                     </ul>
                 </div>
@@ -76,10 +70,12 @@ export default {
         this.checkAuthenticationStatus();
     },
     methods: {
+        // check if user is authenticated
         async checkAuthenticationStatus() {
             const token = localStorage.getItem("token");
             this.isUserAuthenticated = token ? true : false;
         },
+        // logout user from the system
         async logout() {
             let self = this;
             try {

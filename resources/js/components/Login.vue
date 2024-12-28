@@ -5,28 +5,22 @@
             <div class="card-body">
                 <form @submit.prevent="login">
                     <div class="mb-3">
-                        <label for="email" class="form-label"
-                            >Email address</label
-                        >
+                        <label for="email" class="form-label">Email address</label>
                         <input
                             type="text"
                             v-model="email"
                             :class="errorMessage.email ? 'form-control is-invalid' : 'form-control'"
-                            id="email"
-                        />
+                            id="email"/>
                         <div v-if="errorMessage.email" class="invalid-feedback">
                             {{ errorMessage.email[0] }}
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label for="password" class="form-label"
-                            >Password</label
-                        >
+                        <label for="password" class="form-label">Password</label>
                         <input
                             type="password"
                             v-model="password"
-                            :class="errorMessage.password ? 'form-control is-invalid' : 'form-control'"                            id="password"
-                        />
+                            :class="errorMessage.password ? 'form-control is-invalid' : 'form-control'" id="password"/>
                         <div v-if="errorMessage.password" class="invalid-feedback">
                             {{ errorMessage.password[0] }}
                         </div>
@@ -58,6 +52,7 @@ export default {
         };
     },
     methods: {
+        // login function to the system
         async login() {
             let self = this;
             self.errorMessage = [];

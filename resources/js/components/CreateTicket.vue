@@ -15,8 +15,7 @@
                             type="text"
                             id="customer-name"
                             placeholder="Enter your name"
-                            :class="errorMessage.customerName ? 'form-control is-invalid' : 'form-control'"
-                        />
+                            :class="errorMessage.customerName ? 'form-control is-invalid' : 'form-control'"/>
                         <div v-if="errorMessage.customerName" class="invalid-feedback">
                             {{ errorMessage.customerName[0] }}
                         </div>
@@ -27,8 +26,7 @@
                             v-model="problemDescription"
                             :class="errorMessage.problemDescription ? 'form-control is-invalid' : 'form-control'"
                             id="problem-description"
-                            rows="3"
-                        ></textarea>
+                            rows="3"></textarea>
                         <div v-if="errorMessage.problemDescription" class="invalid-feedback">
                             {{ errorMessage.problemDescription[0] }}
                         </div>
@@ -40,8 +38,7 @@
                             type="email"
                             :class="errorMessage.customerEmail ? 'form-control is-invalid' : 'form-control'"
                             id="email"
-                            placeholder="Enter your email address"
-                        />
+                            placeholder="Enter your email address"/>
                         <div v-if="errorMessage.customerEmail" class="invalid-feedback">
                             {{ errorMessage.customerEmail[0] }}
                         </div>
@@ -53,8 +50,7 @@
                             type="tel"
                             :class="errorMessage.customerPhoneNumber ? 'form-control is-invalid' : 'form-control'"
                             id="phone-number"
-                            placeholder="Enter your phone number"
-                        />
+                            placeholder="Enter your phone number"/>
                         <div v-if="errorMessage.customerPhoneNumber" class="invalid-feedback">
                             {{ errorMessage.customerPhoneNumber[0] }}
                         </div>
@@ -88,6 +84,7 @@ export default {
         };
     },
     methods: {
+        // create a new ticket
         async submitTicketDetails() {
             let self = this;
             try {
@@ -115,6 +112,7 @@ export default {
                 }
             }
         },
+        // reset the ticket details
         resetTicketDetails() {
             this.customerName = '';
             this.problemDescription = '';
@@ -125,5 +123,3 @@ export default {
     },
 };
 </script>
-
-<style scoped></style>

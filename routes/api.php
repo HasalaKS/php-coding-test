@@ -9,12 +9,13 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TicketController;
 
 Route::middleware(ThrottleRequests::class . ':api')->group(function () {
+    // routes related to the login
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
+    // routes related to the tickets
     Route::post('/create-ticket', [TicketController::class, 'createTicket']);
     Route::get('/get-tickets', [TicketController::class, 'getTickets'])->middleware('auth:sanctum');
-
     Route::post('/create-reply-to-ticket', [TicketController::class, 'createReplyForTicket'])->middleware('auth:sanctum');
     Route::get('/tickets/{referenceNumber}', [TicketController::class, 'searchTicket']);
 });
