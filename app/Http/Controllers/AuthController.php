@@ -10,10 +10,18 @@ class AuthController extends Controller
 {
     public function login(Request $request)
     {
-        $request->validate([
+        $validator = \Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => 'required',
         ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation errors',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
 
         $user = User::where('email', $request->email)->first();
 
@@ -34,11 +42,6 @@ class AuthController extends Controller
         $request->user()->currentAccessToken()->delete();
 
         return response()->json(['message' => 'Logged out successfully']);
-    }
-
-    public function testFunction(Request $request)
-    {
-        dd("Test function called");
     }
 }
 

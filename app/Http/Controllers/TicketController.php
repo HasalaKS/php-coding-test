@@ -41,4 +41,27 @@ class TicketController extends Controller
             'data' => $ticket,
         ], 201);
     }
+
+    public function getTickets(Request $request)
+    {
+        $requestParams = $request->all();
+        $perPage = !empty($requestParams['perPage']) ? $requestParams['perPage'] : 0;
+
+        if ($perPage == 0) {
+            $tickets = SupportTicket::orderBy('created_at', 'desc')->get();
+
+            $response = [
+                'current_page' => 1,
+                'data' => $tickets,
+                'last_page' => 1,
+                'prev_page_url' => null,
+                'next_page_url' => null,
+                'path' => url('api/tickets'),
+            ];
+        } else {
+            $response = SupportTicket::orderBy('created_at', 'desc')->paginate($perPage);
+        }
+
+        return response()->json($response, 200);
+    }
 }
