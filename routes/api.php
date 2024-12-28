@@ -12,7 +12,7 @@ Route::middleware(ThrottleRequests::class . ':api')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
-    Route::post('/create-ticket', [TicketController::class, 'createTicket'])->middleware('auth:sanctum');
+    Route::post('/create-ticket', [TicketController::class, 'createTicket']);
 
     // Test route with authentication
     Route::post('/test', [AuthController::class, 'testFunction'])->middleware('auth:sanctum');
