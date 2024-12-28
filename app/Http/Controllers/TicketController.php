@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\SendCreatedTicketEmailJob;
 use App\Models\SupportTicket;
 use App\Models\TicketReply;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\SupportTicketCreatedMail;
 
 class TicketController extends Controller
 {
@@ -36,6 +39,10 @@ class TicketController extends Controller
             'customer_email' => $request->customerEmail,
             'customer_phone_number' => $request->customerPhoneNumber,
         ]);
+
+        if($ticket) {
+            SendCreatedTicketEmailJob::dispatch($ticket);
+        }
 
         return response()->json([
             'success' => true,
