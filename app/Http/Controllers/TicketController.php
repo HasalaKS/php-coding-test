@@ -113,4 +113,24 @@ class TicketController extends Controller
             ], 201);
         }
     }
+
+    public function searchTicket($referenceNumber)
+{
+   $ticket = SupportTicket::where('reference_number', $referenceNumber)
+       ->with(['ticketReply' => function ($query) {
+           $query->with('repliedAgent');
+       }])
+       ->first();
+
+
+   if (!$ticket) {
+       return response()->json(['message' => 'Ticket not found.'], 404);
+   }
+
+
+   return response()->json([
+       'ticket' => $ticket
+   ]);
+}
+
 }
