@@ -4,7 +4,8 @@
             <div class="card-header">Ticket Details</div>
             <div class="card-body">
                 <div v-if="successfullyCreated" class="alert alert-success alert-dismissible fade show" role="alert">
-                    <strong>Successfully created</strong>  the Ticket Details
+                    Successfully created. The Ticket reference is <strong>{{ createdTicketReferenceNumber }}</strong>
+                    <small> (The email will be send to your email.)</small>
                 </div>
                 <form>
                     <div class="form-group mb-4">
@@ -73,7 +74,7 @@
 import axios from 'axios';
 
 export default {
-    name: "Home",
+    name: "CreateTicket",
 
     data() {
         return {
@@ -83,6 +84,7 @@ export default {
             customerPhoneNumber: '',
             errorMessage: [],
             successfullyCreated: false,
+            createdTicketReferenceNumber:'',
         };
     },
     methods: {
@@ -96,6 +98,7 @@ export default {
                     customerPhoneNumber: this.customerPhoneNumber,
                 }).then(function(response) {
                     if(response.status === 201) {
+                        self.createdTicketReferenceNumber = response.data.data.reference_number;
                         self.successfullyCreated = true;
                         self.resetTicketDetails();
                     }

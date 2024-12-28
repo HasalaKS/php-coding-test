@@ -19,20 +19,23 @@
                     <ul class="navbar-nav me-auto">
                         <li class="nav-item">
                             <router-link class="nav-link" to="/">
-                                Home
+                                Create Ticket
                             </router-link>
                         </li>
-                        <li class="nav-item">
-                            <router-link class="nav-link" to="/about">
-                                About
+                        <li v-if="isUserAuthenticated" class="nav-item">
+                            <router-link class="nav-link" to="/tickets">
+                                Manage Tickets
                             </router-link>
                         </li>
                     </ul>
                     <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
+                        <li v-if="!isUserAuthenticated" class="nav-item">
                             <router-link to="/login">
                                 <a class="btn btn-outline-success">Login</a>
                             </router-link>
+                        </li>
+                        <li v-if="isUserAuthenticated" class="nav-item">
+                                <a @click.prevent="logout"  class="btn btn-outline-success">Logout</a>
                         </li>
                     </ul>
                 </div>
@@ -40,11 +43,33 @@
         </nav>
 
         <div class="container mt-4">
-            <router-view></router-view>
+            <router-view @authenticationChanged="checkAuthenticationStatus"></router-view>
         </div>
     </div>
 </template>
 
 <script>
-export default { name: "App" };
+export default { 
+    name: "App" ,
+
+    data() {
+        return {
+            isUserAuthenticated: false
+        };
+    },
+    mounted() {
+        this.checkAuthenticationStatus();
+    },
+    methods: {
+        async checkAuthenticationStatus() {
+            const token = localStorage.getItem("token");
+            this.isUserAuthenticated = token ? true : false; 
+        },
+        logout() {
+            localStorage.removeItem("token");
+            this.$router.push("/login");
+            this.isUserAuthenticated = false;
+        }
+    }
+};
 </script>
