@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\SupportTicket;
+use App\Models\TicketReply;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class TicketController extends Controller
@@ -25,8 +27,8 @@ class TicketController extends Controller
             ], 422);
         }
 
-        $referenceNumber = 'TICKET-' . strtoupper(Str::random(6)) . '-' . substr(md5(uniqid('', true)), 0, 8);  
-        
+        $referenceNumber = 'TICKET-' . strtoupper(Str::random(6)) . '-' . substr(md5(uniqid('', true)), 0, 8);
+
         $ticket = SupportTicket::create([
             'reference_number' => $referenceNumber,
             'customer_name' => $request->customerName,
@@ -48,7 +50,7 @@ class TicketController extends Controller
         $perPage = !empty($requestParams['perPage']) ? $requestParams['perPage'] : 0;
 
         if ($perPage == 0) {
-            $tickets = SupportTicket::orderBy('created_at', 'desc')->get();
+            $tickets = SupportTicket::orderBy('created_at', 'desc')->with('ticketReply')->get();
 
             $response = [
                 'current_page' => 1,
@@ -59,9 +61,44 @@ class TicketController extends Controller
                 'path' => url('api/tickets'),
             ];
         } else {
-            $response = SupportTicket::orderBy('created_at', 'desc')->paginate($perPage);
+            $response = SupportTicket::orderBy('created_at', 'desc')->with('ticketReply')->paginate($perPage);
         }
 
         return response()->json($response, 200);
+    }
+
+    public function createReplyForTicket(Request $request)
+    {
+        $supportAgent = Auth::user();
+        if ($supportAgent) {
+
+            $validator = \Validator::make($request->all(), [
+                'replyText' => 'required|string',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation errors',
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+
+            $requestParams = $request->all();
+
+            $ticketReply = TicketReply::create([
+                'ticket_id' => $requestParams['ticketId'],
+                'agent_id' => $supportAgent->id,
+                'reply_text' => $requestParams['replyText'],
+            ]);
+
+            $ticket = SupportTicket::where('id', $requestParams['ticketId'])->update(['status' => $requestParams['status']]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Ticket reply created successfully',
+                'data' => $ticketReply,
+            ], 201);
+        }
     }
 }

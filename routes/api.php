@@ -14,6 +14,8 @@ Route::middleware(ThrottleRequests::class . ':api')->group(function () {
 
     Route::post('/create-ticket', [TicketController::class, 'createTicket']);
     Route::get('/get-tickets', [TicketController::class, 'getTickets'])->middleware('auth:sanctum');
+
+    Route::post('/create-reply-to-ticket', [TicketController::class, 'createReplyForTicket'])->middleware('auth:sanctum');
 });
 
 RateLimiter::for('api', function (Request $request) {

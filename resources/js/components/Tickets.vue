@@ -12,6 +12,7 @@
                             <th>Phone</th>
                             <th>Status</th>
                             <th>Created At</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -31,6 +32,22 @@
                                     ).toLocaleString()
                                 }}
                             </td>
+                            <td>
+                                <button
+                                    v-if="!supportTicket.ticket_reply"
+                                    class="btn btn-primary btn-sm me-2"
+                                    @click="openModal(supportTicket)"
+                                >
+                                    Reply
+                                </button>
+                                <button
+                                    v-else
+                                    class="btn btn-secondary btn-sm"
+                                    @click="openModal(supportTicket)"
+                                >
+                                    Edit
+                                </button>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -46,7 +63,6 @@
                             id="pageCount"
                             class="form-select"
                             v-model="pageRowCount"
-                            @change="getTicketDetails()"
                             style="width: auto; display: inline-block"
                         >
                             <option
@@ -123,11 +139,80 @@
                 </div>
             </div>
         </div>
+
+        <div
+            class="modal fade"
+            id="actionModal"
+            tabindex="-1"
+            role="dialog"
+            aria-labelledby="actionModalLabel"
+            aria-hidden="true"
+        >
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="actionModalLabel">
+                            {{ replyText ? "Edit" : "Create" }} Reply
+                        </h5>
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                        ></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label
+                                for="problem-description"
+                                class="form-label fw-bold"
+                                >Ticket Reply</label
+                            >
+                            <textarea
+                                v-model="replyText"
+                                id="problem-description"
+                                :class="
+                                    errorMessage.replyText
+                                        ? 'form-control is-invalid'
+                                        : 'form-control'
+                                "
+                                rows="5"
+                                placeholder="Enter your reply here..."
+                            ></textarea>
+
+                            <div
+                                v-if="errorMessage.replyText"
+                                class="invalid-feedback"
+                            >
+                                {{ errorMessage.replyText[0] }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            @click="replyTextSubmit('reviewing')"
+                        >
+                            Save as Draft
+                        </button>
+                        <button
+                            type="button"
+                            class="btn btn-primary"
+                            @click="replyTextSubmit('closed')"
+                        >
+                            Close & Submit
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
 <script>
 import axios from "axios";
+import * as bootstrap from "bootstrap";
 
 export default {
     data() {
@@ -136,8 +221,6 @@ export default {
             ticketPagination: {
                 current_page: 1,
                 last_page: 1,
-                prev_page_url: null,
-                next_page_url: null,
             },
             pageRowCount: 10,
             pageOptions: [
@@ -146,6 +229,9 @@ export default {
                 { value: 25, text: "25" },
                 { value: 0, text: "All" },
             ],
+            replyText: "",
+            selectedTicket: null,
+            errorMessage: [],
         };
     },
     methods: {
@@ -160,21 +246,49 @@ export default {
 
                 const response = await axios.get(apiUrl, { params });
                 this.supportTickets = response.data.data || [];
-
-                this.ticketPagination = {
-                    current_page: response.data.current_page || page,
-                    last_page: response.data.last_page || 1,
-                    prev_page_url: response.data.prev_page_url || null,
-                    next_page_url: response.data.next_page_url || null,
-                };
+                this.ticketPagination = response.data;
             } catch (error) {
                 console.error("Error:", error.message);
             }
         },
-    },
-    watch: {
-        pageRowCount() {
-            this.getTicketDetails(1);
+        openModal(ticket) {
+            this.selectedTicket = ticket;
+            this.replyText = ticket.ticket_reply
+                ? ticket.ticket_reply.reply_text
+                : "";
+            const modal = new bootstrap.Modal(
+                document.getElementById("actionModal")
+            );
+            modal.show();
+        },
+        async replyTextSubmit(status) {
+            let self = this;
+            try {
+                await axios
+                    .post("/api/create-reply-to-ticket", {
+                        status: status,
+                        replyText: this.replyText,
+                        ticketId: this.selectedTicket.id,
+                    })
+                    .then(function (response) {
+                        if (response.status === 201) {
+                            const modalElement =
+                                document.getElementById("actionModal");
+                            const modalInstance =
+                                bootstrap.Modal.getInstance(modalElement);
+                            if (modalInstance) {
+                                modalInstance.hide();
+                            }
+                            self.getTicketDetails();
+                        }
+                    });
+            } catch (error) {
+                if (error.response && error.response.status === 422) {
+                    self.errorMessage = error.response.data.errors;
+                } else {
+                    console.log("An Unexpected Error: ", error);
+                }
+            }
         },
     },
     created() {

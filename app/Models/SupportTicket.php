@@ -17,4 +17,10 @@ class SupportTicket extends Model
     ];
 
     protected $dates = ['deleted_at'];
+
+    public function ticketReply()
+    {
+        return $this->belongsTo(TicketReply::class,'id','ticket_id');
+    }
+
 }
