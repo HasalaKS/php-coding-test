@@ -2,18 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Interfaces\TicketInterface;
 use App\Jobs\SendCreatedTicketEmailJob;
 use App\Jobs\SendSupportTicketReplyEmailJob;
 use App\Models\SupportTicket;
 use App\Models\TicketReply;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\SupportTicketCreatedMail;
 
 class TicketController extends Controller
 {
+    private $ticketInterface;
+
+    public function __construct(TicketInterface $ticketInterface)
+    {
+        $this->ticketInterface = $ticketInterface;
+    }
+
     public function createTicket(Request $request)
     {
         $validator = \Validator::make($request->all(), [
@@ -31,17 +36,9 @@ class TicketController extends Controller
             ], 422);
         }
 
-        $referenceNumber = 'TICKET-' . strtoupper(Str::random(6)) . '-' . substr(md5(uniqid('', true)), 0, 8);
+        $ticket = $this->ticketInterface->createSupportTicket($request);
 
-        $ticket = SupportTicket::create([
-            'reference_number' => $referenceNumber,
-            'customer_name' => $request->customerName,
-            'problem_description' => $request->problemDescription,
-            'customer_email' => $request->customerEmail,
-            'customer_phone_number' => $request->customerPhoneNumber,
-        ]);
-
-        if($ticket) {
+        if ($ticket) {
             SendCreatedTicketEmailJob::dispatch($ticket);
         }
 
@@ -56,21 +53,7 @@ class TicketController extends Controller
     {
         $requestParams = $request->all();
         $perPage = !empty($requestParams['perPage']) ? $requestParams['perPage'] : 0;
-
-        if ($perPage == 0) {
-            $tickets = SupportTicket::orderBy('created_at', 'desc')->with('ticketReply')->get();
-
-            $response = [
-                'current_page' => 1,
-                'data' => $tickets,
-                'last_page' => 1,
-                'prev_page_url' => null,
-                'next_page_url' => null,
-                'path' => url('api/tickets'),
-            ];
-        } else {
-            $response = SupportTicket::orderBy('created_at', 'desc')->with('ticketReply')->paginate($perPage);
-        }
+        $response = $this->ticketInterface->getTickets($request, $perPage);
 
         return response()->json($response, 200);
     }
@@ -100,9 +83,9 @@ class TicketController extends Controller
                 'reply_text' => $requestParams['replyText'],
             ]);
 
-            if($ticketReply) {
-                SupportTicket::where('id', $requestParams['ticketId'])->update(['status' => $requestParams['status']]);
-                $ticket = SupportTicket::with('ticketReply')->where('id', $requestParams['ticketId'])->first();
+            if ($ticketReply) {
+                $this->ticketInterface->updateSupportTicketStatus($requestParams['ticketId'], $requestParams['status']);
+                $ticket = $this->ticketInterface->getTicketsById($requestParams['ticketId']);
                 SendSupportTicketReplyEmailJob::dispatch($ticket->toArray());
             }
 
@@ -115,22 +98,15 @@ class TicketController extends Controller
     }
 
     public function searchTicket($referenceNumber)
-{
-   $ticket = SupportTicket::where('reference_number', $referenceNumber)
-       ->with(['ticketReply' => function ($query) {
-           $query->with('repliedAgent');
-       }])
-       ->first();
+    {
+        $ticket = $this->ticketInterface->getTicketsByReferenceNumber($referenceNumber);
 
+        if (!$ticket) {
+            return response()->json(['message' => 'Ticket not found.'], 404);
+        }
 
-   if (!$ticket) {
-       return response()->json(['message' => 'Ticket not found.'], 404);
-   }
-
-
-   return response()->json([
-       'ticket' => $ticket
-   ]);
-}
-
+        return response()->json([
+            'ticket' => $ticket
+        ]);
+    }
 }

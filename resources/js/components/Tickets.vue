@@ -63,6 +63,7 @@
                             id="pageCount"
                             class="form-select"
                             v-model="pageRowCount"
+                            @change="getTicketDetails()"
                             style="width: auto; display: inline-block"
                         >
                             <option
