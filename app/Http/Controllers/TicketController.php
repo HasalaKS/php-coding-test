@@ -5,8 +5,6 @@ namespace App\Http\Controllers;
 use App\Interfaces\TicketInterface;
 use App\Jobs\SendCreatedTicketEmailJob;
 use App\Jobs\SendSupportTicketReplyEmailJob;
-use App\Models\SupportTicket;
-use App\Models\TicketReply;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -19,6 +17,9 @@ class TicketController extends Controller
         $this->ticketInterface = $ticketInterface;
     }
 
+    /**
+     * Crete the support ticket
+     */
     public function createTicket(Request $request)
     {
         $validator = \Validator::make($request->all(), [
@@ -49,6 +50,9 @@ class TicketController extends Controller
         ], 201);
     }
 
+     /**
+     * Get the support ticket details
+     */
     public function getTickets(Request $request)
     {
         $requestParams = $request->all();
@@ -58,6 +62,9 @@ class TicketController extends Controller
         return response()->json($response, 200);
     }
 
+     /**
+     * Crete the reply for the support ticket
+     */
     public function createReplyForTicket(Request $request)
     {
         $supportAgent = Auth::user();
@@ -76,12 +83,7 @@ class TicketController extends Controller
             }
 
             $requestParams = $request->all();
-
-            $ticketReply = TicketReply::create([
-                'ticket_id' => $requestParams['ticketId'],
-                'agent_id' => $supportAgent->id,
-                'reply_text' => $requestParams['replyText'],
-            ]);
+            $ticketReply = $this->ticketInterface->createSupportTicketReply($requestParams, $supportAgent->id);
 
             if ($ticketReply) {
                 $this->ticketInterface->updateSupportTicketStatus($requestParams['ticketId'], $requestParams['status']);
@@ -97,6 +99,9 @@ class TicketController extends Controller
         }
     }
 
+     /**
+     * Search the support ticket by reference number
+     */
     public function searchTicket($referenceNumber)
     {
         $ticket = $this->ticketInterface->getTicketsByReferenceNumber($referenceNumber);

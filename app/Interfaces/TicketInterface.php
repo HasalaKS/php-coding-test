@@ -9,6 +9,7 @@ interface TicketInterface
    public function getTicketsById($ticketId);
    public function getTicketsByReferenceNumber($referenceNumber);
    public function updateSupportTicketStatus($ticketId , $status);
+   public function createSupportTicketReply($request, $agentId);
 }
 
 

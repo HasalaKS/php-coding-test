@@ -4,10 +4,14 @@ namespace App\Repositories;
 
 use App\Interfaces\TicketInterface;
 use App\Models\SupportTicket;
+use App\Models\TicketReply;
 use Illuminate\Support\Str;
 
 class TicketRepository implements TicketInterface
 {
+    /**
+    * Crete the support ticket
+    */
     public function createSupportTicket($request)
     {
         $referenceNumber = 'TICKET-' . strtoupper(Str::random(6)) . '-' . substr(md5(uniqid('', true)), 0, 8);
@@ -21,6 +25,9 @@ class TicketRepository implements TicketInterface
         ]);
     }
 
+    /**
+    * Get all the support tickets with pagination
+    */
     public function getTickets($request, $perPage)
     {
         if ($perPage == 0) {
@@ -39,11 +46,17 @@ class TicketRepository implements TicketInterface
         }
     }
 
+    /**
+    * Get support ticket by ticket id
+    */
     public function getTicketsById($ticketId)
     {
         return SupportTicket::with('ticketReply')->where('id', $ticketId)->first();
     }
 
+    /**
+    * Get support ticket by ticket ticket reference number
+    */
     public function getTicketsByReferenceNumber($referenceNumber)
     {
         return SupportTicket::where('reference_number', $referenceNumber)
@@ -53,8 +66,23 @@ class TicketRepository implements TicketInterface
             ->first();
     }
 
+    /**
+    * Update support ticket status
+    */
     public function updateSupportTicketStatus($ticketId, $status)
     {
         SupportTicket::where('id', $ticketId)->update(['status' => $status]);
+    }
+
+    /**
+    * Create support ticket reply
+    */
+    public function createSupportTicketReply($request, $agentId)
+    {
+        return TicketReply::create([
+            'ticket_id' => $request['ticketId'],
+            'agent_id' =>$agentId,
+            'reply_text' => $request['replyText'],
+        ]);
     }
 }

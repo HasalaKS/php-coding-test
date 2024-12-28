@@ -9,6 +9,7 @@ import axios from 'axios';
 axios.defaults.baseURL = 'http://127.0.0.1:8000'; 
 axios.defaults.withCredentials = true; 
 
+// check and configure routes with authorization token in request before send the request
 axios.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token');
@@ -22,6 +23,7 @@ axios.interceptors.request.use(
     }
 );
 
+// check the request response is authorized 
 axios.interceptors.response.use(
     (response) => response,
     (error) => {

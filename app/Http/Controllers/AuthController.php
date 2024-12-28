@@ -8,6 +8,9 @@ use App\Models\User;
 
 class AuthController extends Controller
 {
+    /**
+     * Login the user into system
+     */
     public function login(Request $request)
     {
         $validator = \Validator::make($request->all(), [
@@ -37,6 +40,9 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * Logout the user from the system
+     */
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
