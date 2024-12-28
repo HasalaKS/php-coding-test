@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\SendCreatedTicketEmailJob;
+use App\Jobs\SendSupportTicketReplyEmailJob;
 use App\Models\SupportTicket;
 use App\Models\TicketReply;
 use Illuminate\Http\Request;
@@ -99,7 +100,11 @@ class TicketController extends Controller
                 'reply_text' => $requestParams['replyText'],
             ]);
 
-            $ticket = SupportTicket::where('id', $requestParams['ticketId'])->update(['status' => $requestParams['status']]);
+            if($ticketReply) {
+                SupportTicket::where('id', $requestParams['ticketId'])->update(['status' => $requestParams['status']]);
+                $ticket = SupportTicket::with('ticketReply')->where('id', $requestParams['ticketId'])->first();
+                SendSupportTicketReplyEmailJob::dispatch($ticket->toArray());
+            }
 
             return response()->json([
                 'success' => true,
