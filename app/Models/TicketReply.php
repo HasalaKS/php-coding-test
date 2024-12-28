@@ -17,4 +17,10 @@ class TicketReply extends Model
     ];
 
     protected $dates = ['deleted_at'];
+
+    public function repliedAgent()
+    {
+        return $this->belongsTo(User::class,'agent_id','id');
+    }
+
 }

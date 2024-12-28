@@ -3,7 +3,7 @@
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container-fluid">
                 <router-link class="nav-link" to="/">
-                    <a class="navbar-brand">PHP Test</a>
+                    <a class="navbar-brand">Ticket Recorder</a>
                 </router-link>
                 <button
                     class="navbar-toggler"
@@ -12,7 +12,8 @@
                     data-bs-target="#navbarNav"
                     aria-controls="navbarNav"
                     aria-expanded="false"
-                    aria-label="Toggle navigation">
+                    aria-label="Toggle navigation"
+                >
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
@@ -22,6 +23,12 @@
                                 Create Ticket
                             </router-link>
                         </li>
+                        <li class="nav-item">
+                            <router-link class="nav-link" to="/search-ticket">
+                                Search Ticket
+                            </router-link>
+                        </li>
+
                         <li v-if="isUserAuthenticated" class="nav-item">
                             <router-link class="nav-link" to="/tickets">
                                 Manage Tickets
@@ -35,7 +42,11 @@
                             </router-link>
                         </li>
                         <li v-if="isUserAuthenticated" class="nav-item">
-                                <a @click.prevent="logout"  class="btn btn-outline-success">Logout</a>
+                            <a
+                                @click.prevent="logout"
+                                class="btn btn-outline-success"
+                                >Logout</a
+                            >
                         </li>
                     </ul>
                 </div>
@@ -43,18 +54,22 @@
         </nav>
 
         <div class="container mt-4">
-            <router-view @authenticationChanged="checkAuthenticationStatus"></router-view>
+            <router-view
+                @authenticationChanged="checkAuthenticationStatus"
+            ></router-view>
         </div>
     </div>
 </template>
 
 <script>
-export default { 
-    name: "App" ,
+import axios from "axios";
+
+export default {
+    name: "App",
 
     data() {
         return {
-            isUserAuthenticated: false
+            isUserAuthenticated: false,
         };
     },
     mounted() {
@@ -63,13 +78,20 @@ export default {
     methods: {
         async checkAuthenticationStatus() {
             const token = localStorage.getItem("token");
-            this.isUserAuthenticated = token ? true : false; 
+            this.isUserAuthenticated = token ? true : false;
         },
-        logout() {
-            localStorage.removeItem("token");
-            this.$router.push("/login");
-            this.isUserAuthenticated = false;
-        }
-    }
+        async logout() {
+            let self = this;
+            try {
+                await axios.post("/api/logout").then(function (response) {
+                    localStorage.removeItem("token");
+                    self.$router.push("/login");
+                    self.isUserAuthenticated = false;
+                });
+            } catch (error) {
+                console.log("An Unexpected Error: ", error);
+            }
+        },
+    },
 };
 </script>
